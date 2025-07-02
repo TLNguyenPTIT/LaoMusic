@@ -1,24 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import styled from 'styled-components';
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
+import MainContent from './components/MainContent';
+import ErrorBoundary from './components/ErrorBoundary';
+
+const AppContainer = styled.div`
+  display: flex;
+  height: 100vh;
+  background-color: #1a1a1a;
+  color: #fff;
+`;
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AppContainer>
+      <ErrorBoundary>
+        <Sidebar />
+        <div style={{ flex: 1 }}>
+          <Header />
+          <MainContent />
+        </div>
+      </ErrorBoundary>
+    </AppContainer>
   );
 }
 
