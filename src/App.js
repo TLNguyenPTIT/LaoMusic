@@ -7,9 +7,19 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 const AppContainer = styled.div`
   display: flex;
-  height: 100vh;
-  background-color: #1a1a1a;
+  min-height: 100vh; /* Đảm bảo chiều cao tối thiểu bằng viewport */
+  background-color: #1a1a1a; /* Đặt background giống với thiết kế */
   color: #fff;
+  overflow: visible;
+  
+`;
+
+const MainContentWrapper = styled.div`
+  margin-left: 220px; /* Độ rộng của sidebar (200px) + padding (20px) */
+  padding: 20px;
+  flex: 1;
+  min-height: 100vh; /* Đảm bảo chiều cao tối thiểu */
+  overflow: visible;
 `;
 
 function App() {
@@ -17,10 +27,10 @@ function App() {
     <AppContainer>
       <ErrorBoundary>
         <Sidebar />
-        <div style={{ flex: 1 }}>
+        <MainContentWrapper>
           <Header />
           <MainContent />
-        </div>
+        </MainContentWrapper>
       </ErrorBoundary>
     </AppContainer>
   );
