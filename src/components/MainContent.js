@@ -2,6 +2,12 @@
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import MusicPlayer from './MusicPlayer';
+import {
+  useRecommendedSongs,
+  useTop100,
+  useTopGenresPlaylists,
+  useTopFavouriteArtists,
+} from '../api/musicApi';
 
 const ContentContainer = styled.div`
   padding: 20px;
@@ -67,8 +73,12 @@ const ScrollRightButton = styled.button`
 
 export default function MainContent() {
   const gridRefs = useRef([]);
-
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+
+  const { data: recommended } = useRecommendedSongs();
+  const { data: top100 } = useTop100();
+  const { data: genres } = useTopGenresPlaylists();
+  const { data: artists } = useTopFavouriteArtists();
 
   const scrollRight = (sectionIndex) => {
     const grid = gridRefs.current[sectionIndex];
@@ -77,54 +87,102 @@ export default function MainContent() {
     }
   };
 
+  // Combine all songs for MusicPlayer
   const tracks = [
-    { name: 'Còn gì đau hơn chữ đã từng', url: '/music/ConGiDauHonChuDaTung-QuanAP-16057075.mp3' },
-    { name: 'Đúng người đúng thời điểm', url: '/music/DungNguoiDungThoiDiem-ThanhHungIdol-6044113.mp3' },
-    { name: 'Nơi này có anh', url: '/music/NoiNayCoAnh-SonTungMTP-4772041.mp3' },
-    { name: 'Sunroof', url: '/music/Sunroof-NickyYouredazyManuelTurizo-7800844.mp3' },
-    { name: 'Vũ trụ có anh', url: '/music/VuTruCoAnh-PhuongMyChiDTAPPhao-9297066.mp3' },
+    ...(recommended?.data || []),
+    ...(top100?.data?.flatMap((playlist) => playlist.songs || []) || [])
   ];
 
-  const sections = [
-    { title: 'Nghe gì hôm nay', images: 'artist' },
-    { title: 'Nhạc TOP 100', images: 'top100' },
-    { title: 'ຜ່ອນຄາຍ', images: 'artist' },
-    { title: 'ເພງແທຣນ / ເພງຮາວສ໌ / ເພງເທັກໂນ', images: 'top100' },
-    { title: 'ເພງເດັກນ້ອຍ', images: 'artist' },
-    { title: 'Youtube Trending', images: 'top100' },
-  ];
-
-  // Hàm xử lý khi click bất kì card nào
   const handleCardClick = () => {
     setCurrentTrackIndex(prev => (prev + 1) % tracks.length);
-    console.log('Click bất kì card nào → phát bài mới:', tracks[(currentTrackIndex + 1) % tracks.length].name);
+    console.log('Phát bài mới:', tracks[(currentTrackIndex + 1) % tracks.length]?.name);
   };
 
   return (
     <ContentContainer>
-      {sections.map((section, sectionIndex) => (
-        <div key={sectionIndex}>
-          <SectionTitle>{section.title}</SectionTitle>
-          <CardGridWrapper>
-            <CardGrid ref={el => (gridRefs.current[sectionIndex] = el)}>
-              {[...Array(10)].map((_, itemIndex) => (
-                <CardContainer key={itemIndex}>
-                  <Card onClick={handleCardClick}>
-                    <img
-                      src={`/images/${section.images}${(itemIndex % 5) + 1}.jpg`}
-                      alt={`Item ${itemIndex + 1}`}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                  </Card>
-                  {itemIndex === 6 && (
-                    <ScrollRightButton onClick={() => scrollRight(sectionIndex)}>›</ScrollRightButton>
-                  )}
-                </CardContainer>
-              ))}
-            </CardGrid>
-          </CardGridWrapper>
-        </div>
-      ))}
+      {/* Nghe gì hôm nay */}
+      <SectionTitle>Nghe gì hôm nay</SectionTitle>
+      <CardGridWrapper>
+        <CardGrid ref={el => (gridRefs.current[0] = el)}>
+          {(recommended?.data || []).map((song, index) => (
+            <CardContainer key={song.id || index}>
+              <Card onClick={handleCardClick}>
+                <img
+                  src={song.thumbnail || `/images/artist${(index % 5) + 1}.jpg`}
+                  alt={song.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </Card>
+              {index === 6 && (
+                <ScrollRightButton onClick={() => scrollRight(0)}>›</ScrollRightButton>
+              )}
+            </CardContainer>
+          ))}
+        </CardGrid>
+      </CardGridWrapper>
+
+      {/* Nhạc top 100 */}
+      <SectionTitle>Nhạc TOP 100</SectionTitle>
+      <CardGridWrapper>
+        <CardGrid ref={el => (gridRefs.current[1] = el)}>
+          {(top100?.data || []).map((playlist, index) => (
+            <CardContainer key={playlist.id || index}>
+              <Card onClick={handleCardClick}>
+                <img
+                  src={playlist.thumbnail || `/images/top100${(index % 5) + 1}.jpg`}
+                  alt={playlist.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </Card>
+              {index === 6 && (
+                <ScrollRightButton onClick={() => scrollRight(1)}>›</ScrollRightButton>
+              )}
+            </CardContainer>
+          ))}
+        </CardGrid>
+      </CardGridWrapper>
+
+      {/* Chủ đề */}
+      <SectionTitle>Chủ đề</SectionTitle>
+      <CardGridWrapper>
+        <CardGrid ref={el => (gridRefs.current[2] = el)}>
+          {(genres?.data || []).map((genre, index) => (
+            <CardContainer key={genre.id || index}>
+              <Card onClick={handleCardClick}>
+                <img
+                  src={genre.thumbnail || `/images/top100${(index % 5) + 1}.jpg`}
+                  alt={genre.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </Card>
+              {index === 6 && (
+                <ScrollRightButton onClick={() => scrollRight(2)}>›</ScrollRightButton>
+              )}
+            </CardContainer>
+          ))}
+        </CardGrid>
+      </CardGridWrapper>
+
+      {/* Ca sỹ yêu thích */}
+      <SectionTitle>Ca sỹ yêu thích</SectionTitle>
+      <CardGridWrapper>
+        <CardGrid ref={el => (gridRefs.current[3] = el)}>
+          {(artists?.data || []).map((artist, index) => (
+            <CardContainer key={artist.id || index}>
+              <Card onClick={handleCardClick}>
+                <img
+                  src={artist.thumbnail || `/images/artist${(index % 5) + 1}.jpg`}
+                  alt={artist.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </Card>
+              {index === 6 && (
+                <ScrollRightButton onClick={() => scrollRight(3)}>›</ScrollRightButton>
+              )}
+            </CardContainer>
+          ))}
+        </CardGrid>
+      </CardGridWrapper>
 
       <MusicPlayer
         tracks={tracks}
