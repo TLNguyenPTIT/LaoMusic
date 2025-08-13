@@ -1,15 +1,16 @@
-// src/App.js
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MainContent from './components/MainContent';
+import SearchPage from './pages/SearchPage';
 import MusicPlayer from './components/MusicPlayer';
 import ErrorBoundary from './components/ErrorBoundary';
 
 const AppContainer = styled.div`
   display: flex;
-  flex-direction: column; /* bọc dọc */
+  flex-direction: column;
   min-height: 100vh;
 `;
 
@@ -36,26 +37,36 @@ export default function App() {
   ];
 
   return (
-    <AppContainer>
-      <ErrorBoundary>
-        <MainWrapper>
-          <Sidebar />
-          <MainContentWrapper>
-            <Header />
-            <MainContent
-              tracks={tracks}
-              setCurrentTrackIndex={setCurrentTrackIndex}
-            />
-          </MainContentWrapper>
-        </MainWrapper>
+    <Router>
+      <AppContainer>
+        <ErrorBoundary>
+          <MainWrapper>
+            <Sidebar />
+            <MainContentWrapper>
+              <Header />
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <MainContent
+                      tracks={tracks}
+                      setCurrentTrackIndex={setCurrentTrackIndex}
+                    />
+                  }
+                />
+                <Route path="/search" element={<SearchPage />} />
+              </Routes>
+            </MainContentWrapper>
+          </MainWrapper>
 
-        {/* ✅ Player cố định luôn hiển thị */}
-        <MusicPlayer
-          tracks={tracks}
-          currentTrackIndex={currentTrackIndex}
-          setCurrentTrackIndex={setCurrentTrackIndex}
-        />
-      </ErrorBoundary>
-    </AppContainer>
+          {/* Player cố định luôn hiển thị */}
+          <MusicPlayer
+            tracks={tracks}
+            currentTrackIndex={currentTrackIndex}
+            setCurrentTrackIndex={setCurrentTrackIndex}
+          />
+        </ErrorBoundary>
+      </AppContainer>
+    </Router>
   );
 }
